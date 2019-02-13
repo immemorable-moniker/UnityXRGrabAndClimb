@@ -8,7 +8,8 @@ public class Interactable : MonoBehaviour
     public enum InteractableType
     {
         Grabable,
-        Climbable
+        Climbable,
+        JointManipulator
     }
 
     public InteractableType type = InteractableType.Grabable;
@@ -20,7 +21,8 @@ public class Interactable : MonoBehaviour
 
     public void Grab(PlayerInput_Interactor grabScript)
     {
-        if (GrabTransform != null) {
+        if (GrabTransform != null)
+        {
             GrabTransform.GetComponent<PlayerInput_Interactor>().ForceDrop();
         }
 

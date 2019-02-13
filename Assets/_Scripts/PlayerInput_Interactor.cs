@@ -90,13 +90,14 @@ public class PlayerInput_Interactor : MonoBehaviour
             HeldObject = TargetObject;
             HeldObjectInteractable = HeldObject.GetComponent<Interactable>();
 
-            if (HeldObjectInteractable.type == Interactable.InteractableType.Grabable)
+            if (HeldObjectInteractable.type == Interactable.InteractableType.Grabable
+                || HeldObjectInteractable.type == Interactable.InteractableType.JointManipulator)
             {
                 HeldObjectInteractable.Grab(this);
                 CreateJoint(HeldObject);
                 waitingOnFirstRelease = HeldObjectInteractable.StickyGrab;
             }
-            else if (ClimbScript != null 
+            else if (ClimbScript != null
                 && HeldObjectInteractable.type == Interactable.InteractableType.Climbable)
             {
                 ClimbScript.AddInfluencer(this);
@@ -139,6 +140,14 @@ public class PlayerInput_Interactor : MonoBehaviour
                 Vector3 RadiusVector = HeldObject.transform.position - Transform.position;
                 XRRigRigidbody.AddForce(-XRRigRigidbody.velocity, ForceMode.VelocityChange); // zero the velocity
                 XRRigRigidbody.AddForce(-InteractorVelocity, ForceMode.VelocityChange); // fling
+            }
+            else if (HeldObjectInteractable.type == Interactable.InteractableType.JointManipulator)
+            {
+                if (grabJoint)
+                    DestroyJoint();
+
+                Vector3 RadiusVector = HeldObject.transform.position - Transform.position;
+                HeldObject.GetComponent<Rigidbody>().AddForce(InteractorVelocity + Vector3.Cross(InteractorAngularVelocity, RadiusVector), ForceMode.VelocityChange);
             }
 
             HeldObject = null;
