@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CapsuleCollider))]
-public class GravityCollider : MonoBehaviour
+public class BodyColliderBehaviour : MonoBehaviour
 {
     public Transform Transform { get; private set; }
     public Transform FloorOffset;
@@ -19,7 +19,7 @@ public class GravityCollider : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         for (int i = 0; i < Capsules.Length; i++)
         {

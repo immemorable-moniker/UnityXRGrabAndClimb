@@ -11,10 +11,14 @@ public class PlayerInput : MonoBehaviour
     private bool GripValue_Right;
     private bool TriggerValue_Left;
     private bool TriggerValue_Right;
-    private float TriggerAxisValue_Left;
-    private float TriggerAxisValue_Right;
     private bool MenuValue_Left;
     private bool MenuValue_Right;
+    private bool PrimaryAxis2DTouch_Left;
+    private bool PrimaryAxis2DTouch_Right;
+    private bool PrimaryAxis2DClick_Left;
+    private bool PrimaryAxis2DClick_Right;
+    private float TriggerAxisValue_Left;
+    private float TriggerAxisValue_Right;
     private Vector2 PrimaryAxis2DValue_Left;
     private Vector2 PrimaryAxis2DValue_Right;
 
@@ -30,6 +34,10 @@ public class PlayerInput : MonoBehaviour
     public event BoolEventHandler TriggerInputEvent_Right;
     public event BoolEventHandler MenuInputEvent_Left;
     public event BoolEventHandler MenuInputEvent_Right;
+    public event BoolEventHandler Primary2DAxisTouchInputEvent_Left;
+    public event BoolEventHandler Primary2DAxisTouchInputEvent_Right;
+    public event BoolEventHandler Primary2DAxisClickInputEvent_Left;
+    public event BoolEventHandler Primary2DAxisClickInputEvent_Right;
     public event FloatEventHandler TriggerAxisInputEvent_Left;
     public event FloatEventHandler TriggerAxisInputEvent_Right;
     public event Vector2EventHandler Primary2DAxisInputEvent_Left;
@@ -164,6 +172,30 @@ public class PlayerInput : MonoBehaviour
         {
             MenuValue_Right = Input.GetButton("XR_Right_Menu");
             MenuInputEvent_Right?.Invoke(MenuValue_Right);
+        }
+
+        if (PrimaryAxis2DTouch_Left != Input.GetButton("XR_Left_Primary2DAxisTouch"))
+        {
+            PrimaryAxis2DTouch_Left = Input.GetButton("XR_Left_Primary2DAxisTouch");
+            Primary2DAxisTouchInputEvent_Left?.Invoke(PrimaryAxis2DTouch_Left);
+        }
+
+        if (PrimaryAxis2DTouch_Right != Input.GetButton("XR_Right_Primary2DAxisTouch"))
+        {
+            PrimaryAxis2DTouch_Right = Input.GetButton("XR_Right_Primary2DAxisTouch");
+            Primary2DAxisTouchInputEvent_Right?.Invoke(PrimaryAxis2DTouch_Right);
+        }
+
+        if (PrimaryAxis2DClick_Left != Input.GetButton("XR_Left_Primary2DAxisClick"))
+        {
+            PrimaryAxis2DClick_Left = Input.GetButton("XR_Left_Primary2DAxisClick");
+            Primary2DAxisClickInputEvent_Left?.Invoke(PrimaryAxis2DClick_Left);
+        }
+
+        if (PrimaryAxis2DClick_Right != Input.GetButton("XR_Right_Primary2DAxisClick"))
+        {
+            PrimaryAxis2DClick_Right = Input.GetButton("XR_Right_Primary2DAxisClick");
+            Primary2DAxisClickInputEvent_Right?.Invoke(PrimaryAxis2DClick_Right);
         }
 
         if (PrimaryAxis2DValue_Left.x != Input.GetAxis("XR_Left_Primary2DAxisX") ||

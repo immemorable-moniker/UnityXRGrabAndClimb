@@ -8,7 +8,7 @@ public class RingBuffer<T>
 
     public int Count { get; private set; }
 
-    private int backIndex = 0, frontIndex = 0;
+    private int frontIndex = 0;
 
     public RingBuffer(int bufferSize)
     {
@@ -20,8 +20,6 @@ public class RingBuffer<T>
     {
         if (Count != backingValues.Length)
             Count++;
-        else
-            backIndex++;
 
         backingValues[frontIndex] = item;
         frontIndex++;
@@ -31,14 +29,22 @@ public class RingBuffer<T>
     public void Clear()
     {
         frontIndex = 0;
-        backIndex = 0;
         Count = 0;
     }
 
+    // returns values with zero being the most recent value
     public T this[int index]
     {
         get
         {
+            if (index < 0 || index >= Count)
+                return default;
+
+            index = frontIndex - index;
+
+            if (index < 0)
+                index = backingValues.Length + index;
+
             return backingValues[index];
         }
     }

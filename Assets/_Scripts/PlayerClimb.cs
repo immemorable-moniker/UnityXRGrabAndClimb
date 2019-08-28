@@ -2,37 +2,45 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(PlayerReferences))]
 public class PlayerClimb : MonoBehaviour
 {
-    public GravityCollider GravityColliderScript;
+    public BodyColliderBehaviour GravityColliderScript;
 
-    private Rigidbody Rigidbody;
+    private Rigidbody m_Rigidbody;
 
-    private List<PlayerInput_Interactor> ClimbInfluencers;
-    private Vector3 ClimbXRRigReference;
-    private Vector3 CollisionCorrection;
+    private List<PlayerInput_Interactor> m_ClimbInfluencers;
+    private Vector3 m_ClimbXRRigReference;
+    private Vector3 m_CollisionCorrection;
 
-    private Vector3 BodyCollisionPosition;
-    private Vector3 LastKnownGoodPosition;
-    private bool Colliding;
-    private float CorrectionRecoveryRate = 0.01f;
+    private Vector3 m_BodyCollisionPosition;
+    private Vector3 m_LastKnownGoodPosition;
+    private bool m_Colliding;
+    private float m_CorrectionRecoveryRate = 0.01f;
+
+    public bool Climbing
+    {
+        get
+        {
+            return (m_ClimbInfluencers.Count != 0);
+        }
+    }
 
     void Awake()
     {
-        Rigidbody = GetComponent<Rigidbody>();
+        m_Rigidbody = GetComponent<PlayerReferences>().rigRigidbody;
 
-        ClimbInfluencers = new List<PlayerInput_Interactor>(2);
-        CollisionCorrection = Vector3.zero;
+        m_ClimbInfluencers = new List<PlayerInput_Interactor>(2);
+        m_CollisionCorrection = Vector3.zero;
     }
 
     public void AddInfluencer(PlayerInput_Interactor NewInfluencer)
     {
-        if (ClimbInfluencers.Contains(NewInfluencer))
+        if (m_ClimbInfluencers.Contains(NewInfluencer))
             return;
 
-        ClimbInfluencers.Add(NewInfluencer);
-        Rigidbody.useGravity = false;
+        m_ClimbInfluencers.Add(NewInfluencer);
+        m_Rigidbody.useGravity = false;
         GravityColliderScript.CollisionStatusChanged += HandleCollision;
 
         ResetReferences();
@@ -40,49 +48,47 @@ public class PlayerClimb : MonoBehaviour
 
     public void RemoveInfluencer(PlayerInput_Interactor NewInfluencer)
     {
-        if (ClimbInfluencers.Contains(NewInfluencer))
+        if (m_ClimbInfluencers.Contains(NewInfluencer))
         {
             GravityColliderScript.CollisionStatusChanged -= HandleCollision;
-            ClimbInfluencers.Remove(NewInfluencer);
+            m_ClimbInfluencers.Remove(NewInfluencer);
         }
 
-        if (ClimbInfluencers.Count == 0)
+        if (m_ClimbInfluencers.Count == 0)
         {
-            Rigidbody.useGravity = true;
-            CollisionCorrection = Vector3.zero;
-            Colliding = false;
+            m_Rigidbody.useGravity = true;
+            m_CollisionCorrection = Vector3.zero;
+            m_Colliding = false;
         }
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-        if (!Colliding)
+        if (!m_Colliding)
         {
-            LastKnownGoodPosition = Rigidbody.position;
+            m_LastKnownGoodPosition = m_Rigidbody.position;
         }
 
-        if (ClimbInfluencers.Count != 0)
+        if (m_ClimbInfluencers.Count != 0)
         {
             Vector3 TargetPositionDeltaAverage = Vector3.zero;
-            for (int i = 0; i < ClimbInfluencers.Count; i++)
+            for (int i = 0; i < m_ClimbInfluencers.Count; i++)
             {
-                TargetPositionDeltaAverage += ClimbInfluencers[i].XRRigTargetDelta;
+                TargetPositionDeltaAverage += m_ClimbInfluencers[i].XRRigTargetDelta;
             }
-            TargetPositionDeltaAverage /= ClimbInfluencers.Count;
+            TargetPositionDeltaAverage /= m_ClimbInfluencers.Count;
             
-            if (Colliding)
-                CollisionCorrection += LastKnownGoodPosition - BodyCollisionPosition;
-            else if (CollisionCorrection != Vector3.zero)
+            if (m_Colliding)
+                m_CollisionCorrection += m_LastKnownGoodPosition - m_BodyCollisionPosition;
+            else if (m_CollisionCorrection != Vector3.zero)
             {
-                CollisionCorrection -= CollisionCorrection.normalized * Mathf.Min(CorrectionRecoveryRate, CollisionCorrection.magnitude);
+                m_CollisionCorrection -= m_CollisionCorrection.normalized * Mathf.Min(m_CorrectionRecoveryRate, m_CollisionCorrection.magnitude);
             }
 
-            Debug.Log("CollisionCorrection " + CollisionCorrection);
-
-            Rigidbody.MovePosition(
-                ClimbXRRigReference 
-                + CollisionCorrection 
+            m_Rigidbody.MovePosition(
+                m_ClimbXRRigReference
+                + m_CollisionCorrection
                 + TargetPositionDeltaAverage
                 );
         }
@@ -90,21 +96,19 @@ public class PlayerClimb : MonoBehaviour
 
     void HandleCollision(Transform transform, bool colliding)
     {
-        Debug.Log("HandleCollision.  colliding = " + colliding);
+        m_Colliding = colliding;
 
-        Colliding = colliding;
-
-        if (Colliding)
-            BodyCollisionPosition = Rigidbody.position;
+        if (m_Colliding)
+            m_BodyCollisionPosition = m_Rigidbody.position;
     }
 
     void ResetReferences()
     {
-        ClimbXRRigReference = Rigidbody.position;
+        m_ClimbXRRigReference = m_Rigidbody.position;
 
-        for (int i = 0; i < ClimbInfluencers.Count; i++)
+        for (int i = 0; i < m_ClimbInfluencers.Count; i++)
         {
-            ClimbInfluencers[i].ResetReference();
+            m_ClimbInfluencers[i].ResetReference();
         }
     }
 }
