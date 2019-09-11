@@ -154,9 +154,6 @@ public class PlayerInput_Interactor : MonoBehaviour
             {
                 climbScript.RemoveInfluencer(this);
                 Climbing = false;
-
-                xrRigRigidbody.AddForce(-xrRigRigidbody.velocity, ForceMode.VelocityChange); // zero the velocity
-                xrRigRigidbody.AddForce(-3f * velocities.Velocity, ForceMode.VelocityChange); // fling
             }
             else if (HeldObjectInteractable.type == Interactable.InteractableType.JointManipulator)
             {
